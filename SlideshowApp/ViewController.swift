@@ -15,36 +15,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var forwardButtonEnabled: UIButton!
     
     @IBAction func playView(_ sender: Any) {
-
-        if playButton.titleLabel?.text == "再生" {    //ボタンの再生＆停止の表示切替
-            playButton.setTitle("停止",for: .normal)
-        } else {
-            playButton.setTitle("再生",for: .normal)
-        }
-        
-        
-        if timer == nil{    // 2秒ごとに動作するタイマーを作る
-            self.timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(onTimer), userInfo: nil, repeats: true)
-        }else {
-                timer?.invalidate()
-                timer = nil
-        }
-        
-        
-        if timer != nil{    //戻る・進むボタンの無効・有効化
-            self.backButtonEnabled.isEnabled = false
-        }else{
-            self.forwardButtonEnabled.isEnabled = true
-        }
-        
-        if timer != nil{
-            self.forwardButtonEnabled.isEnabled = false
-        }else{
-            self.backButtonEnabled.isEnabled = true
-        }
-
+        toggleSlideshow(isEnabled: timer == nil)
     }
-    
     
     @IBOutlet weak var imageView: UIImageView!    //画像を送る処理を書く
     
@@ -52,6 +24,7 @@ class ViewController: UIViewController {
     
     var timer:Timer?
     var dispImageNo = 0  // 表示している画像の番号
+    
     func displayImage() {   // 表示している画像の番号を元に画像を表示する
         let imageNameArray = [
             "image1.jpeg",
@@ -68,6 +41,30 @@ class ViewController: UIViewController {
         let name = imageNameArray[dispImageNo]  // 表示している画像の番号から名前を取り出し
         let image = UIImage(named: name)     // 画像を読み込み
         imageView.image = image // Image Viewに読み込んだ画像をセット
+    }
+    
+    func toggleSlideshow(isEnabled:Bool) {
+        if isEnabled { // 2秒ごとに動作するタイマーを作る
+            playButton.setTitle("停止",for: .normal)
+            
+            self.timer = Timer.scheduledTimer(
+                timeInterval: 2.0,
+                target: self,
+                selector: #selector(onTimer),
+                userInfo: nil,
+                repeats: true
+            )
+        } else {
+            playButton.setTitle("再生",for: .normal)
+            
+            if (timer != nil) {
+                timer?.invalidate()
+                timer = nil
+            }
+        }
+        
+        self.backButtonEnabled.isEnabled = !isEnabled
+        self.forwardButtonEnabled.isEnabled = !isEnabled
     }
     
 
@@ -104,6 +101,9 @@ class ViewController: UIViewController {
     
     //拡大画面のための関数
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        toggleSlideshow(isEnabled: false)
+        
         // segueから遷移先のResultViewControllerを取得する
         let secondViewController:SecondViewController = segue.destination as! SecondViewController
         // 遷移先のSecondViewControllerで宣言しているdispImageNoに値を代入して渡す
@@ -113,9 +113,5 @@ class ViewController: UIViewController {
     @IBAction func unwind(_ segue: UIStoryboardSegue) {
         // 他の画面から segue を使って戻ってきた時に呼ばれる
     }
-    
 
 }
-
-
-
